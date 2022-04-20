@@ -31,4 +31,7 @@ last_30 <-
 
 library(patchwork)
 
-since_dec/ last_30
+fig_out <- since_dec/ last_30
+
+ggsave("FigOut.png", fig_out , width = 4, height = 9)
+
