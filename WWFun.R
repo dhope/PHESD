@@ -35,3 +35,4 @@ fig_out <- since_dec/ last_30
 
 ggsave("FigOut.png", fig_out , width = 4, height = 9)
 
+fig_out
