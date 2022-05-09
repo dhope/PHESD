@@ -1,3 +1,5 @@
+![](FigOut.png)
+
 # The Public Health Environmental Surveillance Database (PHESD)
 
 [![DOI](https://zenodo.org/badge/410863559.svg)](https://zenodo.org/badge/latestdoi/410863559)
@@ -16,13 +18,12 @@ To ensure that the PHESD is usable for all users, we use the Public Health Envir
 
 ## Current Objectives
 
-- **Easily share wastewater data.** The PHESD is focused on and built for Canadian data, but we are happy to revieve data from anywhere. The goal is to create one space to easily share data between researchers and programs.
+-   **Easily share wastewater data.** The PHESD is focused on and built for Canadian data, but we are happy to revieve data from anywhere. The goal is to create one space to easily share data between researchers and programs.
 
-- **Allow detailed wastewater data.** This is a distinction between PHESD and other repositories - with the PHESD we allow for the storage of even detailed data. This means storing details on variants and sequencing, among other details.
+-   **Allow detailed wastewater data.** This is a distinction between PHESD and other repositories - with the PHESD we allow for the storage of even detailed data. This means storing details on variants and sequencing, among other details.
 
-- **Easy to add data.** This database will use the Public Health Environmental Surveillance Open Data Model ([PHES-ODM](https://github.com/Big-Life-Lab/PHES-ODM)) to allow wastewater testing labs to share their using an open access, open science approach in a shared format. To help support labs and other data custodians is adopting the PHES-ODM format for the PHESD, we have developed a suite of tools to automate data validation using the Open Data Model validation schema and rule set. We can automatically add your data if it is in the PHES-ODM format on common data platforms like Dropbox, Sync, Google Drive, ArcGIS. This automatic data scraping can come from open access sources, but to preserve privacy for some labs we may scrap to a private version of this GitHub repository, which we then scrap onto this public-facing repository.
+-   **Easy to add data.** This database will use the Public Health Environmental Surveillance Open Data Model ([PHES-ODM](https://github.com/Big-Life-Lab/PHES-ODM)) to allow wastewater testing labs to share their using an open access, open science approach in a shared format. To help support labs and other data custodians is adopting the PHES-ODM format for the PHESD, we have developed a suite of tools to automate data validation using the Open Data Model validation schema and rule set. We can automatically add your data if it is in the PHES-ODM format on common data platforms like Dropbox, Sync, Google Drive, ArcGIS. This automatic data scraping can come from open access sources, but to preserve privacy for some labs we may scrap to a private version of this GitHub repository, which we then scrap onto this public-facing repository.
 
 ## Important Note:
 
 A method modification was applied on June 8th 2021 to the Ottawa wastewater data set. The magnitudes (not the shape of the curve) from June 8th to present have been retroactively modified on April 12, 2022 to better align the modified method to previous data.
-
