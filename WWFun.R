@@ -18,7 +18,8 @@ ggplot(d |>
   xintercept = lubridate::ymd("2022-03-21")) +
   geom_vline(linetype =2,
   xintercept = lubridate::ymd("2022-04-13")) +
-  labs(x = "Date", y = "Normalized viral copies") 
+  labs(x = "Date", y = "Normalized viral copies") +
+  geom_hline(yintercept = tail(d$rollavg, n = 1), colour = 'red')
     # geom_hline(yintercept = 0.0018745)#0.00229)
 
 last_30 <- 
