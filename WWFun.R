@@ -7,6 +7,18 @@ d <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv") |>
   mutate(rollavg = roll_meanr(pavg, n=7, fill = NA, align = 'right') )
 # m <- read_csv("Wastewater/Ottawa/Data/wwMeasure.csv")
 
+
+dates_of_import <- tribble(~date, ~Event,
+                           "2022-03-21", "Masks off",
+                           "2022-04-13", "Masks on",
+                           "2022-05-30", "Masks off",
+                           "2022-08-30", "QC",
+                           "2022-09-06", "ON"
+                           ) |> 
+  mutate(across(date, lubridate::ymd))
+  
+
+
 since_dec <- 
 ggplot(d |> 
          filter(sampleDate> lubridate::ymd("2021-12-01") & !qualityFlag), #|> slice_tail(n=30) ,
@@ -14,15 +26,16 @@ ggplot(d |>
   geom_point(aes(y = pavg),alpha = 0.2)+
   geom_line() +
   ggthemes::theme_clean()+
-  geom_vline(linetype =2,
-  xintercept = lubridate::ymd("2022-03-21")) +
-  geom_vline(linetype =2,
-  xintercept = lubridate::ymd("2022-04-13")) +
-  geom_vline(linetype =2,
-  xintercept = lubridate::ymd("2022-05-30")) +
+  geom_vline(data = dates_of_import,
+             linetype =2,
+             aes(xintercept = date)) +
   labs(x = "Date", y = "Normalized viral copies") +
-  geom_hline(yintercept = tail(d$rollavg, n = 1), colour = 'red')
-    # geom_hline(yintercept = 0.0018745)#0.00229)
+  geom_hline(yintercept = tail(d$rollavg, n = 1), colour = 'red')  +
+  ggrepel::geom_text_repel(data = dates_of_import, 
+            aes(x = date,
+                y=0.0028,
+                label = Event))
+  
 
 last_30 <- 
   ggplot(d |> slice_tail(n=30) ,
@@ -40,4 +53,4 @@ fig_out <- since_dec/ last_30
 
 ggsave("FigOut.png", fig_out , width = 4, height = 9)
 
-fig_out
+# fig_out
