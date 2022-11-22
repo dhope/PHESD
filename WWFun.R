@@ -75,7 +75,7 @@ ggplot(d |>
          bind_rows(gatineau) |> 
          filter(sampleDate > (lubridate::today()-60)),
        aes(sampleDate, rel_viral, colour = Virus)) +
-  geom_line(size=1) +
+  geom_line(linewidth=1) +
   # ggthemes::theme_clean()+
   rcartocolor::scale_color_carto_d(palette = 'Vivid') +
   labs(x = "Date", y = "Viral load (proportional to max observed)") +
