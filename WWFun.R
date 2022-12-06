@@ -6,7 +6,7 @@ df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv") |>
   mutate(COVID_copies_pavg = mean(c_across(c(covN1_nPMMoV_meanNr,
                       covN2_nPMMoV_meanNr)), na.rm=T )) |> ungroup() |> 
   filter( !qualityFlag)
-
+thirty_days <- Sys.Date() - lubridate::days(30)
 d <- df |> 
   transmute(sampleDate, across(.cols = c(COVID_copies_pavg, InfA_copies_per_pep_copies_avg ,
                      InfB_copies_per_pep_copies_avg ,
@@ -73,7 +73,7 @@ ggplot(d |>
 rel_risk <- 
 ggplot(d |>
          bind_rows(gatineau) |> 
-         filter(sampleDate > (lubridate::today()-60)),
+         filter(sampleDate >= (lubridate::today()-60)),
        aes(sampleDate, rel_viral, colour = Virus)) +
   geom_line(linewidth=1) +
   # ggthemes::theme_clean()+
@@ -86,11 +86,13 @@ ggplot(d |>
   
 
 last_30 <- 
-  ggplot(d |> filter(grepl("COVID", Virus) )|> slice_tail(n=30) ,
+  ggplot(d |> filter(grepl("COVID", Virus) & sampleDate>=thirty_days),
          aes(sampleDate, pavg  )) +
   # geom_point(aes(y = pavg),alpha = 0.2)+
   geom_line() +
-  geom_line(data = slice_tail(gatineau, n=30),aes(y=rollavg), linetype=2) +
+  geom_line(data = gatineau |> 
+              filter(sampleDate>=thirty_days), aes(y=rollavg),
+            linetype=2) +
   # ggthemes::theme_clean()+
   geom_vline(linetype =2,
              xintercept = lubridate::ymd("2022-03-21")) +
