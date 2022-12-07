@@ -6,7 +6,7 @@ df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv") |>
   mutate(COVID_copies_pavg = mean(c_across(c(covN1_nPMMoV_meanNr,
                       covN2_nPMMoV_meanNr)), na.rm=T )) |> ungroup() |> 
   filter( !qualityFlag)
-thirty_days <- Sys.Date() - lubridate::days(30)
+back_cast_date <- Sys.Date() - lubridate::days(45)
 d <- df |> 
   transmute(sampleDate, across(.cols = c(COVID_copies_pavg, InfA_copies_per_pep_copies_avg ,
                      InfB_copies_per_pep_copies_avg ,
@@ -20,7 +20,13 @@ d <- df |>
   filter(!is.na(pavg)) |> 
   separate(Var, into = c("Virus", "remainder", "rem2"), sep = "_copies_") |> 
   group_by(Virus) |> 
-  mutate(rel_viral = pavg/ max(pavg, na.rm=T)) |> ungroup()
+  mutate(rel_viral = pavg/ max(pavg, na.rm=T),
+         std_virus = case_when(Virus=="COVID"~pavg/22,
+                               Virus=="InfA"~pavg,
+                               Virus=="InfB"~NA_real_,
+                               Virus=="RSV"~pavg/3,
+                               TRUE~pavg)) |> ungroup()
+    # Based on https://twitter.com/emerc19/status/1600578611710676992 from @emerc19
 
                      
                      
@@ -28,9 +34,10 @@ d <- df |>
 gatineau <- read_csv(here::here("Wastewater/graph_1-1_gatineau.csv")) |> 
   janitor::clean_names() |> 
   mutate(sampleDate = lubridate::ymd(date_du_prelevement),
-         rollavg = station_depuration_de_gatineau_moy_7_jours/1e7) |> 
+         pavg = station_depuration_de_gatineau_moy_7_jours/1e7) |> 
   mutate(Virus = "COVID Gatineau") |> 
-  mutate(rel_viral = rollavg/max(rollavg, na.rm=T))
+  mutate(rel_viral = pavg/max(pavg, na.rm=T),
+         std_virus = pavg/22)
 # m <- read_csv("Wastewater/Ottawa/Data/wwMeasure.csv")
 
 
@@ -49,22 +56,22 @@ dates_of_import <- tribble(~date, ~Event,
 since_dec <- 
 ggplot(d |> 
          filter(sampleDate> lubridate::ymd("2021-12-01") & grepl("COVID", Virus) ), #|> slice_tail(n=30) ,
-       aes(sampleDate, pavg  )) +
+       aes(sampleDate, std_virus  )) +
   # geom_point(aes(y = COVID_pavg),alpha = 0.2)+
   geom_line() +
   geom_line(data = gatineau |> 
               filter(sampleDate> lubridate::ymd("2021-12-01")),
-            aes(y=rollavg),
+            # aes(y=pavg),
             linetype = 2) +
   # ggthemes::theme_clean()+
   geom_vline(data = dates_of_import,
              linetype =3,
              aes(xintercept = date)) +
   labs(x = "Date", y = "Normalized viral copies") +
-  geom_hline(yintercept = tail(d$COVID_pavg, n = 1), colour = 'red')  +
+  # geom_hline(yintercept = tail(d$COVID_pavg, n = 1), colour = 'red')  +
   ggrepel::geom_text_repel(data = dates_of_import,
             aes(x = date,
-                y=0.0028,
+                y=0.8e-4,
                 label = Event)) 
 
 
@@ -74,11 +81,12 @@ rel_risk <-
 ggplot(d |>
          bind_rows(gatineau) |> 
          filter(sampleDate >= (lubridate::today()-60)),
-       aes(sampleDate, rel_viral, colour = Virus)) +
+       aes(sampleDate, std_virus, colour = Virus)) +
   geom_line(linewidth=1) +
   # ggthemes::theme_clean()+
   rcartocolor::scale_color_carto_d(palette = 'Vivid') +
-  labs(x = "Date", y = "Viral load (proportional to max observed)") +
+  theme(axis.ticks.y = element_blank(), axis.text.y =  element_blank()) +
+  labs(x = "Date", y = "Viral load (scaled for equivalency)") +
   scale_x_date(#date_breaks = '15 days', 
                date_labels =  "%d\n%b") 
 
@@ -86,12 +94,12 @@ ggplot(d |>
   
 
 last_30 <- 
-  ggplot(d |> filter(grepl("COVID", Virus) & sampleDate>=thirty_days),
-         aes(sampleDate, pavg  )) +
+  ggplot(d |> filter(grepl("COVID", Virus) & sampleDate>=back_cast_date),
+         aes(sampleDate, std_virus  )) +
   # geom_point(aes(y = pavg),alpha = 0.2)+
   geom_line() +
   geom_line(data = gatineau |> 
-              filter(sampleDate>=thirty_days), aes(y=rollavg),
+              filter(sampleDate>=back_cast_date),
             linetype=2) +
   # ggthemes::theme_clean()+
   geom_vline(linetype =2,
