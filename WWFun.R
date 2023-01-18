@@ -37,7 +37,7 @@ gatineau <- read_csv(here::here("Wastewater/graph_1-1_gatineau.csv")) |>
          pavg = station_depuration_de_gatineau_moy_7_jours/1e7) |> 
   mutate(Virus = "COVID Gatineau") |> 
   mutate(rel_viral = pavg/max(pavg, na.rm=T),
-         std_virus = pavg/22)
+         std_virus = pavg/11)#22)
 # m <- read_csv("Wastewater/Ottawa/Data/wwMeasure.csv")
 
 
