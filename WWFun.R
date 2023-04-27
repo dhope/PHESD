@@ -25,7 +25,10 @@ d <- df |>
                                Virus=="InfA"~pavg,
                                Virus=="InfB"~NA_real_,
                                Virus=="RSV"~pavg/3,
-                               TRUE~pavg)) |> ungroup()
+                               TRUE~pavg),
+         year = year(sampleDate),
+         doy = yday(sampleDate)) |> 
+  group_by(year) |> mutate(cum_virus = cumsum(rel_viral)) |> ungroup() 
     # Based on https://twitter.com/emerc19/status/1600578611710676992 from @emerc19
 
                      
@@ -90,7 +93,14 @@ ggplot(d |>
   scale_x_date(#date_breaks = '15 days', 
                date_labels =  "%d\n%b") 
 
-
+cumulative_virus <- 
+  ggplot(d |> filter(year>2021 & doy<yday(today())), 
+         aes(ymd("2023-01-01")-1+doy, cum_virus,
+             colour = factor(year))) + 
+  geom_line(linewidth =1) +
+  labs(x = "", y  = "Cumulative weekly virus detected", colour = "Year") +
+  rcartocolor::scale_color_carto_d(palette = "Safe")  +
+  theme(legend.position = c(0.2,.8), legend.background = element_blank())
   
 
 last_30 <- 
@@ -111,8 +121,15 @@ library(patchwork)
 
 fig_out <- since_dec +last_30 + plot_layout(widths = c(0.7, 0.3))
 
-figure <- fig_out / rel_risk
+fig_bot <- rel_risk + cumulative_virus
+
+figure <- fig_out / fig_bot
 
 ggsave("FigOut.png", figure , width = 10, height = 6)
 
 # fig_out
+
+
+
+
+
