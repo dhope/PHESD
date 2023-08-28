@@ -123,7 +123,7 @@ fig_out <- since_dec +last_30 + plot_layout(widths = c(0.7, 0.3))
 
 fig_bot <- rel_risk + cumulative_virus
 
-figure <- fig_out / fig_bot
+figure <- since_dec / fig_bot
 
 ggsave("FigOut.png", figure , width = 10, height = 6)
 
