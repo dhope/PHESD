@@ -44,15 +44,15 @@ gatineau <- read_csv(here::here("Wastewater/graph_1-1_gatineau.csv")) |>
 # m <- read_csv("Wastewater/Ottawa/Data/wwMeasure.csv")
 
 
-dates_of_import <- tribble(~date, ~Event,
-                           "2022-03-21", "Masks off",
-                           "2022-04-13", "Masks on",
-                           "2022-05-30", "Masks off",
-                           "2022-08-30", "QC",
-                           "2022-09-06", "ON"
-                           ) |> 
-  mutate(across(date, lubridate::ymd)) |> 
-  mutate(Virus="COVID")
+# dates_of_import <- tribble(~date, ~Event,
+#                            "2022-03-21", "Masks off",
+#                            "2022-04-13", "Masks on",
+#                            "2022-05-30", "Masks off",
+#                            "2022-08-30", "QC",
+#                            "2022-09-06", "ON"
+#                            ) |> 
+#   mutate(across(date, lubridate::ymd)) |> 
+#   mutate(Virus="COVID")
   
 
 
@@ -77,13 +77,18 @@ ggplot(d |>
                 y=0.8e-4,
                 label = Event)) 
 
-
+last_year <- d |> 
+  filter(doy >= yday((lubridate::today()-60)) & year == (year(today())-1)& Virus == "COVID" &
+          doy <= yday(today())) |> 
+  mutate(Virus = "Covid - Last year",
+         sampleDate = (ymd("2023-01-01")+doy))
 
 
 rel_risk <- 
 ggplot(d |>
          bind_rows(gatineau) |> 
-         filter(sampleDate >= (lubridate::today()-60)),
+         filter(sampleDate >= (lubridate::today()-60)) |> 
+         bind_rows(last_year),
        aes(sampleDate, std_virus, colour = Virus)) +
   geom_line(linewidth=1) +
   # ggthemes::theme_clean()+
