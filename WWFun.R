@@ -1,7 +1,7 @@
 library(tidyverse)
 library(RcppRoll)
 theme_set(theme_light(base_size = 14, base_family = "Roboto Condensed"))
-df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv") |> 
+df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv", col_types = cols()) |> 
   rowwise() |> 
   mutate(COVID_copies_pavg = mean(c_across(c(covN1_nPMMoV_meanNr,
                       covN2_nPMMoV_meanNr)), na.rm=T )) |> ungroup() |> 
@@ -34,7 +34,7 @@ d <- df |>
                      
                      
 
-gatineau <- read_csv(here::here("Wastewater/graph_1-1_gatineau.csv")) |> 
+gatineau <- read_csv(here::here("Wastewater/graph_1-1_gatineau.csv"), col_types = cols()) |> 
   janitor::clean_names() |> 
   mutate(sampleDate = lubridate::ymd(date_du_prelevement),
          pavg = station_depuration_de_gatineau_moy_7_jours/1e7) |> 
@@ -67,15 +67,15 @@ ggplot(d |>
             # aes(y=pavg),
             linetype = 2) +
   # ggthemes::theme_clean()+
-  geom_vline(data = dates_of_import,
-             linetype =3,
-             aes(xintercept = date)) +
-  labs(x = "Date", y = "Normalized viral copies") +
+  # geom_vline(data = dates_of_import,
+  #            linetype =3,
+  #            aes(xintercept = date)) +
+  labs(x = "Date", y = "Normalized viral copies") #+
   # geom_hline(yintercept = tail(d$COVID_pavg, n = 1), colour = 'red')  +
-  ggrepel::geom_text_repel(data = dates_of_import,
-            aes(x = date,
-                y=0.8e-4,
-                label = Event)) 
+  # ggrepel::geom_text_repel(data = dates_of_import,
+  #           aes(x = date,
+  #               y=0.8e-4,
+  #               label = Event)) 
 
 last_year <- d |> 
   filter(doy >= yday((lubridate::today()-60)) & year == (year(today())-1)& Virus == "COVID" &
