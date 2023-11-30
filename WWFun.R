@@ -28,7 +28,8 @@ d <- df |>
                                TRUE~pavg),
          year = year(sampleDate),
          doy = yday(sampleDate)) |> 
-  group_by(year) |> mutate(cum_virus = cumsum(rel_viral)) |> ungroup() 
+  group_by(year, Virus) |> mutate(cum_virus = cumsum(rel_viral),
+                           cum_days = row_number()) |> ungroup() 
     # Based on https://twitter.com/emerc19/status/1600578611710676992 from @emerc19
 
                      
@@ -99,7 +100,7 @@ ggplot(d |>
                date_labels =  "%d\n%b") 
 
 cumulative_virus <- 
-  ggplot(d |> filter(year>2021 & doy<yday(today())), 
+  ggplot(d |> filter(Virus == "COVID" & year>2021 & doy<yday(today())), 
          aes(ymd("2023-01-01")-1+doy, cum_virus,
              colour = factor(year))) + 
   geom_line(linewidth =1) +
