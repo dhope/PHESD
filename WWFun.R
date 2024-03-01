@@ -82,12 +82,12 @@ last_year <- d |>
   filter(doy >= yday((lubridate::today()-60)) & year == (year(today())-1)& Virus == "COVID" &
           doy <= yday(today())) |> 
   mutate(Virus = "Covid - Last year",
-         sampleDate = (ymd("2023-01-01")+doy))
+         sampleDate = (ymd(glue::glue("{year(Sys.Date())}-01-01"))+doy))
 
 
 rel_risk <- 
 ggplot(d |>
-         bind_rows(gatineau) |> 
+         # bind_rows(gatineau) |> 
          filter(sampleDate >= (lubridate::today()-60)) |> 
          bind_rows(last_year),
        aes(sampleDate, std_virus, colour = Virus)) +
@@ -125,7 +125,7 @@ last_30 <-
                date_labels =  "%d\n%b") 
 library(patchwork)
 
-fig_out <- since_dec +last_30 + plot_layout(widths = c(0.7, 0.3))
+# fig_out <- since_dec +last_30 + plot_layout(widths = c(0.7, 0.3))
 
 fig_bot <- rel_risk + cumulative_virus
 
