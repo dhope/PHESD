@@ -7,17 +7,20 @@ df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv", col_types = cols()
                       covN2_nPMMoV_meanNr)), na.rm=T )) |> ungroup() |> 
   filter( !qualityFlag)
 back_cast_date <- Sys.Date() - lubridate::days(45)
-d <- df |> 
-  transmute(sampleDate, across(.cols = c(COVID_copies_pavg, InfA_copies_per_pep_copies_avg ,
+
+extr_dates <- tibble(sampleDate = seq(min(df$sampleDate), max(df$sampleDate)) )
+
+d <- left_join(extr_dates, df) |> 
+    transmute(sampleDate, across(.cols = c(COVID_copies_pavg, InfA_copies_per_pep_copies_avg ,
                      InfB_copies_per_pep_copies_avg ,
                      RSV_copies_per_pep_copies_avg,
                      MPOX_copies_per_pep_copies_avg 
                      ),
                 .fns = 
-                  ~{roll_meanr(as.numeric(.x), n=7, fill = NA, align = 'right')})) |> 
+                  ~{roll_meanr(as.numeric(.x), n=7, fill = NA, align = 'right', na.rm = T)})) |> 
   pivot_longer(cols = -c(sampleDate), names_to = "Var", 
                values_to = "pavg") |> 
-  filter(!is.na(pavg)) |> 
+  # filter(!is.na(pavg)) |> 
   separate(Var, into = c("Virus", "remainder", "rem2"), sep = "_copies_") |> 
   group_by(Virus) |> 
   mutate(rel_viral = pavg/ max(pavg, na.rm=T),
@@ -29,7 +32,8 @@ d <- df |>
          year = year(sampleDate),
          doy = yday(sampleDate)) |> 
   group_by(year, Virus) |> mutate(cum_virus = cumsum(rel_viral),
-                           cum_days = row_number()) |> ungroup() 
+                           cum_days = row_number()) |> ungroup() |> 
+  filter(sampleDate %in% df$sampleDate)
     # Based on https://twitter.com/emerc19/status/1600578611710676992 from @emerc19
 
                      
