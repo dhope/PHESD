@@ -104,10 +104,30 @@ ggplot(d |>
                date_labels =  "%d\n%b") 
 
 cumulative_virus <- 
-  ggplot(d |> filter(Virus == "COVID" & year>2021 & doy<yday(today())), 
+  ggplot(d |> filter(Virus == "COVID" & year>2021 & doy<yday(today())) |> 
+           mutate(week = week(sampleDate)
+                  ) |> 
+           summarize(std_virus = mean(std_virus),
+                     sampleDate = mean(sampleDate),
+                     doy = mean(doy),
+                     .by = c(year, week)) |> 
+           # slice_sample(n=2, by = c(year, week)) |> 
+           arrange(sampleDate) |> 
+           mutate(cum_virus=cumsum(std_virus), .by = year), 
          aes(ymd("2023-01-01")-1+doy, cum_virus,
              colour = factor(year))) + 
   geom_line(linewidth =1) +
+  labs(x = "", y  = "Cumulative weekly virus detected", colour = "Year") +
+  rcartocolor::scale_color_carto_d(palette = "Safe")  +
+  theme(legend.position = c(0.2,.8), legend.background = element_blank())
+
+cov_vs_inf <- 
+  ggplot(
+    filter(d, sampleDate> lubridate::ymd("2021-12-01") &str_detect(Virus, "COVID|InfA") & doy<yday(today())),
+    # d |> filter(str_detect(Virus, "COVID|InfA") & year>2021 & doy<yday(today())), 
+         aes(sampleDate, std_virus,
+             colour = Virus)) + 
+  geom_line() +
   labs(x = "", y  = "Cumulative weekly virus detected", colour = "Year") +
   rcartocolor::scale_color_carto_d(palette = "Safe")  +
   theme(legend.position = c(0.2,.8), legend.background = element_blank())
@@ -131,7 +151,7 @@ library(patchwork)
 
 # fig_out <- since_dec +last_30 + plot_layout(widths = c(0.7, 0.3))
 
-fig_bot <- rel_risk + cumulative_virus
+fig_bot <- rel_risk + cov_vs_inf
 
 figure <- since_dec / fig_bot
 
