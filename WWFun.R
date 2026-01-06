@@ -81,10 +81,14 @@ ggplot(d |>
   #           aes(x = date,
   #               y=0.8e-4,
   #               label = Event)) 
+last_30_doy <- 
+d |> filter(sampleDate >= (lubridate::today()-60)) |> distinct(year,doy) |> 
+  group_split(year) |> map( ~tibble(year = unique(.x$year),
+                            doy =seq(range(.x$doy)[[1]],range(.x$doy)[[2]], by = 1)) ) |> 
+  list_rbind() |> mutate(date = ymd(glue::glue("{year}-01-01")) + doy)
 
 last_year <- d |> 
-  filter(doy >= yday((lubridate::today()-60)) & year == (year(today())-1)& Virus == "COVID" &
-          doy <= yday(today())) |> 
+  filter(sampleDate %in% last_30_doy$date & Virus == "COVID" ) |> 
   mutate(Virus = "Covid - Last year",
          sampleDate = (ymd(glue::glue("{year(Sys.Date())}-01-01"))+doy))
 
@@ -123,7 +127,7 @@ cumulative_virus <-
 
 cov_vs_inf <- 
   ggplot(
-    filter(d, sampleDate> lubridate::ymd("2021-12-01") &str_detect(Virus, "COVID|InfA") & doy<yday(today())),
+    filter(d, sampleDate> lubridate::ymd("2021-12-01") &str_detect(Virus, "COVID|InfA") ),
     # d |> filter(str_detect(Virus, "COVID|InfA") & year>2021 & doy<yday(today())), 
          aes(sampleDate, std_virus,
              colour = Virus)) + 
