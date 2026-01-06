@@ -85,19 +85,19 @@ last_30_doy <-
 d |> filter(sampleDate >= (lubridate::today()-60)) |> distinct(year,doy) |> 
   group_split(year) |> map( ~tibble(year = unique(.x$year),
                             doy =seq(range(.x$doy)[[1]],range(.x$doy)[[2]], by = 1)) ) |> 
-  list_rbind() |> mutate(date = ymd(glue::glue("{year}-01-01")) + doy)
+  list_rbind() |> mutate(date = ymd(glue::glue("{year-1}-01-01")) + doy)
 
 last_year <- d |> 
   filter(sampleDate %in% last_30_doy$date & Virus == "COVID" ) |> 
   mutate(Virus = "Covid - Last year",
-         sampleDate = (ymd(glue::glue("{year(Sys.Date())}-01-01"))+doy))
+         sampleDate = (ymd(glue::glue("{year+1}-01-01"))+doy))
 
 
 rel_risk <- 
 ggplot(d |>
          # bind_rows(gatineau) |> 
          filter(sampleDate >= (lubridate::today()-60)) |> 
-         bind_rows(last_year),
+         bind_rows(last_year) ,
        aes(sampleDate, std_virus, colour = Virus)) +
   geom_line(linewidth=1) +
   # ggthemes::theme_clean()+
