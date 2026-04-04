@@ -5,7 +5,7 @@ df <- read_csv("Wastewater/Ottawa/Data/wastewater_virus.csv", col_types = cols()
   rowwise() |> 
   mutate(COVID_copies_pavg = mean(c_across(c(covN1_nPMMoV_meanNr,
                       covN2_nPMMoV_meanNr)), na.rm=T )) |> ungroup() |> 
-  filter( !qualityFlag)
+  filter( !isTRUE(qualityFlag))
 back_cast_date <- Sys.Date() - lubridate::days(45)
 
 extr_dates <- tibble(sampleDate = seq(min(df$sampleDate), max(df$sampleDate)) )
